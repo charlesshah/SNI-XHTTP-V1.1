@@ -26,12 +26,10 @@ export default async function handler(req, res) {
     const targetUrl = `${TARGET_BASE}${req.url}`;
     const outgoingHeaders = {};
 
-    // Filter and sanitize headers
     Object.entries(req.headers).forEach(([key, value]) => {
       const k = key.toLowerCase();
       if (FORBIDDEN_HEADERS.includes(k) || k.startsWith("x-vercel-")) return;
       
-      // Preserve IP integrity
       if (k === "x-real-ip" || k === "x-forwarded-for") {
         outgoingHeaders["x-forwarded-for"] = Array.isArray(value) ? value[0] : value;
         return;
@@ -52,7 +50,6 @@ export default async function handler(req, res) {
       }),
     });
 
-    // Setup response status and headers
     res.statusCode = response.status;
     response.headers.forEach((value, key) => {
       if (key.toLowerCase() !== "transfer-encoding") {
@@ -60,16 +57,11 @@ export default async function handler(req, res) {
       }
     });
 
-    // Stream the body if it exists
     if (response.body) {
       await pipeline(Readable.fromWeb(response.body), res);
     } else {
       res.end();
     }
   } catch (error) {
-    console.error("Relay execution failed:", error);
-    if (!res.headersSent) {
-      res.status(502).end("Bad Gateway: Tunnel Failed");
-    }
   }
 }
