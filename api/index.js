@@ -7,7 +7,7 @@ export const config = {
   maxDuration: 60,
 };
 
-const TARGET_BASE = (process.env.TARGET_DOMAIN || "").replace(/\/$/, "");
+const TARGET_BASE = (process.env.MEOW || "").replace(/\/$/, "");
 
 const STRIP_HEADERS = new Set([
   "host",
@@ -28,7 +28,7 @@ const STRIP_HEADERS = new Set([
 export default async function handler(req, res) {
   if (!TARGET_BASE) {
     res.statusCode = 500;
-    return res.end("Misconfigured: TARGET_DOMAIN is not set");
+    return res.end("Misconfigured: MEOW is not set");
   }
 
   try {
